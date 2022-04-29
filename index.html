@@ -1345,11 +1345,11 @@
       };
 
       var GetVersionFileLists = async (version = '2.2.4') => {
-        let fileLists = {'_INSTALL': InstallFiles,
+        let fileLists = {'INSTALL': InstallFiles,
                          //'_FULLINSTALL': FullInstallFiles,
-                         '_PERSISTENT': PersistentLumpFiles,
-                         '_STARTUP': StartupFiles,
-                         '_REQUIRED': RequiredFiles};
+                         'PERSISTENT': PersistentLumpFiles,
+                         'STARTUP': StartupFiles,
+                         'REQUIRED': RequiredFiles};
         // Download all file lists
         try {
           await CheckInstallFileList(Object.keys(fileLists), version, true, null, null);
@@ -1386,7 +1386,7 @@
 
       var GetVersionBases = async (version = '2.2.4') => {
         // Build BASE dependency list
-        // TODO Do MD5 checks on the remote _BASE files, in the
+        // TODO Do MD5 checks on the remote BASE files, in the
         // rare event that the base version should change.
         if (VersionBases instanceof Object && version in VersionBases)
           return VersionBases[version];
@@ -1397,7 +1397,7 @@
           let customStore = new idbKeyval.Store('SRB2_DATA', 'FILES', 1);
           do {
             // Check IDB first
-            childBaseVer = await idbKeyval.get(CompositeKey('_BASE', baseVer), customStore);
+            childBaseVer = await idbKeyval.get(CompositeKey('BASE', baseVer), customStore);
             if (childBaseVer) {
               if (!base.includes(childBaseVer)) {
                 base.push(childBaseVer);
@@ -1405,8 +1405,8 @@
               } else
                 break; // no circular references, thanks
             } else {
-              // If IDB doesn't have the _BASE, then check the server
-              childBaseVer = await fetch(`data/${baseVer}/_BASE`);
+              // If IDB doesn't have the BASE, then check the server
+              childBaseVer = await fetch(`data/${baseVer}/BASE`);
               if (!childBaseVer.ok)
                 // assume no base version, but don't store anything
                 // in case this was an error.
@@ -1416,15 +1416,15 @@
                 if (childBaseVer) {
                   if (!base.includes(childBaseVer)) {
                     console.log(`GetVersionBases: Logging Base ${childBaseVer} for version ${baseVer}`);
-                    await idbKeyval.set(CompositeKey('_BASE', baseVer), childBaseVer, customStore);
+                    await idbKeyval.set(CompositeKey('BASE', baseVer), childBaseVer, customStore);
                     base.push(childBaseVer);
                     baseVer = childBaseVer;
                   } else {
-                    await idbKeyval.set(CompositeKey('_BASE', baseVer), '', customStore);
+                    await idbKeyval.set(CompositeKey('BASE', baseVer), '', customStore);
                     break; // no circular references, thanks
                   }
                 } else {
-                  await idbKeyval.set(CompositeKey('_BASE', baseVer), '', customStore);
+                  await idbKeyval.set(CompositeKey('BASE', baseVer), '', customStore);
                   break; // no further bases
                 }
               }
